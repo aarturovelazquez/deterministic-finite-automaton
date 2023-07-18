@@ -16,7 +16,6 @@ int main() {
         break;
 
     case 2:
-        validacion();
         break;
 
     case 3:
@@ -35,18 +34,10 @@ void traduccion() {
     char input;
     int i=0;
 
-    while (input != "\n")
-    {
+    while (input != 'S')
+    {   
         scanf("%c",&input);
-        alfabeto_entrada[20][i] = input;
-    }
-    
-
-       
+        alfabeto_entrada[i][20] = input;
+        i++;
+    }      
 }
-
-void validacion(){
-    
-}
-
-//char validCharacters[] = {'a', 'á', 'A', 'Á', 'b', 'c', 'd', 'e', 'é', 'E', 'É', 'f', 'g', 'h', 'i', 'í', 'I', 'Í', 'j', 'k', 'l', 'm', 'n', 'ñ', 'N', 'Ñ', 'o', 'ó', 'O', 'Ó', 'p', 'q', 'r', 's', 't', 'u', 'ú', 'U', 'Ú', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
