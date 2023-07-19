@@ -1,6 +1,14 @@
+#include <stdlib.h>
 #include <stdio.h>
+#include<string.h>  
 #include <stdbool.h>
-#include <ctype.h>
+
+//declarations
+
+void traduccion();
+void validacion();
+bool spanishPlz(char input[]);
+
 
 int main() {
     int selection;
@@ -9,35 +17,123 @@ int main() {
     printf("2. AFD Validacion \n");
     printf("3. Salir \n");
     scanf("%d", &selection);
-    switch (selection)
+    while (selection !=3)
+    {
+       switch (selection)
     {
     case 1:
         traduccion();
         break;
 
     case 2:
+        validacion();
         break;
 
     case 3:
         return 0;
-    
-    default:
-        printf("Intenta otra vez");
+
     }
-    return 0;
+    }
+    
+   
 
 }
 
 void traduccion() {
+    system("cls"); //to clear the terminal screen so it looks cleaner. This does not take effect in visual studio codde
     printf("Capture el alfabeto de entrada \n");
-    char alfabeto_entrada[15][20];
-    char input;
-    int i=0;
+    char entryalphabet;
+    scanf("%s", &entryalphabet);
 
-    while (input != 'S')
-    {   
-        scanf("%c",&input);
-        alfabeto_entrada[i][20] = input;
-        i++;
-    }      
+    printf("Capture el alfabeto de salida: \n");  
+    char exitalphabet;
+    scanf("%s", &exitalphabet);
+
+    printf("Registre el cojunto de estados Q: \n");
+    char estados;
+    scanf("%s", &estados); 
+
+    printf("Registe el conjunto de estados A:");  
+    char estadoA;
+    scanf("%s", &estadoA); 
+
+    printf("Registe el estado inicial q0");
+    char estadoQ0;
+    scanf("%s", &estadoQ0); 
+
 }
+
+void validacion(){
+    system("cls");
+    char entryalphabet[20][20];
+    int i = 0;
+    char input[20];
+    while (1)
+    {
+        system("cls");
+        if (0<i)
+        {
+        printf("Alfabeto de entrada: \n");
+            for (int x = 0; x < i; x++)
+            {
+                printf("%s \n",entryalphabet[x]);
+            }
+        }
+        
+        printf("Capture el alfabeto de entrada \n");
+        scanf("%s", &input);
+
+        if (strcmp(input, "") == 0)
+            break;
+
+  if (spanishPlz(input)) {
+            printf("El input contiene caracteres que no son del idioma español.\n");
+        } else {
+            strcpy(entryalphabet[i], input);
+            i++;
+        }
+        
+    }
+
+    printf("Capture el alfabeto de salida: \n");  
+    char exitalphabet;
+    scanf("%s", &exitalphabet);
+
+    printf("Registre el cojunto de estados Q: \n");
+    char estados;
+    scanf("%s", &estados); 
+
+    printf("Registe el conjunto de estados A:");  
+    char estadoA;
+    scanf("%s", &estadoA); 
+
+    printf("Registe el estado inicial q0");
+    char estadoQ0;
+    scanf("%s", &estadoQ0);
+
+}
+
+bool spanishPlz(char input[]){
+       // Array of all possible characters in the Spanish language
+    char spanish_characters[] = "abcdefghijklmnopqrstuvwxyz"
+                                "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                                "áéíóúÁÉÍÓÚ"
+                                "ñÑ"
+                                "üÜ"
+                                "0123456789";
+
+    for (int i = 0; input[i] != '\0'; i++) {
+        bool found = false;
+        for (int j = 0; spanish_characters[j] != '\0'; j++) {
+            if (input[i] == spanish_characters[j]) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            return true; // Return true if any character is not from the Spanish language
+        }
+    }
+    return false; // Return false if all characters are from the Spanish language
+}
+
