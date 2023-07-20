@@ -2,12 +2,14 @@
 #include <stdio.h>
 #include<string.h>  
 #include <stdbool.h>
+#include <cstring>
 
 //declarations
 
 void traduccion();
 void validacion();
 bool spanishPlz(char input[]);
+bool EstadoDuplicado(char input[],char estados[]);
 
 
 int main() {
@@ -65,43 +67,75 @@ void traduccion() {
 
 void validacion(){
     system("cls");
-    char entryalphabet[20][20];
     int i = 0;
     char input[20];
+
+
+    //Capturar el alfabeto
+    char entryalphabet[20][20]; 
     while (1)
     {
         system("cls");
+
+        // if (spanishPlz(input)) {
+        //     printf("Error, el simbolo ingresado no pertenece al español");  
+        // }
+
         if (0<i)
         {
         printf("Alfabeto de entrada: \n");
             for (int x = 0; x < i; x++)
             {
-                printf("%s \n",entryalphabet[x]);
+                 printf("%s \n",entryalphabet[x]);
             }
         }
-        
+            
         printf("Capture el alfabeto de entrada \n");
         scanf("%s", &input);
 
-        if (strcmp(input, "") == 0)
+        if (strcmp(input,"S") == 0)
             break;
 
-  if (spanishPlz(input)) {
-            printf("El input contiene caracteres que no son del idioma español.\n");
-        } else {
+    if (!spanishPlz(input)) {
             strcpy(entryalphabet[i], input);
-            i++;
+            i++;      
         }
-        
     }
 
-    printf("Capture el alfabeto de salida: \n");  
-    char exitalphabet;
-    scanf("%s", &exitalphabet);
+  //Capturar estados
+    char estados[15][20]; //rows and columns
+    i = 0;
+    while(true)
+    {
+        // system("cls");
 
-    printf("Registre el cojunto de estados Q: \n");
-    char estados;
-    scanf("%s", &estados); 
+        if (i>0)
+        {
+            printf("Conjunto de estados: \n");
+            for (int x = 0; x < i; x++)
+            {
+                 printf("%s ",estados[x], " ");
+            }
+            printf("\n");
+        }
+
+        
+        printf("Registre el cojunto de estados Q: \n");
+        scanf("%s", &input);
+
+        if (strcmp(input, "S") == 0 && i > 0 or strcmp(input, "s") == 0 && i > 0 ) {
+            break;
+        }
+        else if (strcmp(input, "S") == 0 && i == 0 or strcmp(input, "s") == 0 && i == 0)
+        {
+            printf("Error, debe de haber por al menos un conjunto de estados \n");
+        }       
+        else{
+            //validation that the state doesn't exist
+            strcpy(estados[i],input);
+            i++;
+        }  
+    }
 
     printf("Registe el conjunto de estados A:");  
     char estadoA;
@@ -110,6 +144,9 @@ void validacion(){
     printf("Registe el estado inicial q0");
     char estadoQ0;
     scanf("%s", &estadoQ0);
+
+    //funcion de transicion
+
 
 }
 
@@ -136,4 +173,22 @@ bool spanishPlz(char input[]){
     }
     return false; // Return false if all characters are from the Spanish language
 }
+
+// bool EstadoDuplicado(char input[], char estados[][20]) {
+//     int result;
+//     bool duplicate = false;
+//     for (int i = 0; estados[i] != '\0'; i++) {
+//         printf("El estado actual es %s",estados[i], "\n");
+//         result = strcmp(estados + i, input); // Use estados + i to get the address of the current substring
+//         if (result == 1) {
+//             duplicate = true;
+//             break;
+//         }
+//     }
+//     printf("%d",result, "\n");
+//     return duplicate;
+// }
+
+
+ 
 
