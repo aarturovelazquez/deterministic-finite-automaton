@@ -9,7 +9,7 @@
 void traduccion();
 void validacion();
 bool spanishPlz(char input[]);
-bool EstadoDuplicado(char input[],char estados[]);
+bool EstadoDuplicado(const char input[], const char estados[][20], int size);
 
 
 int main() {
@@ -95,6 +95,7 @@ void validacion(){
 
         if (strcmp(input,"S") == 0)
             break;
+            system("cls");
 
     if (!spanishPlz(input)) {
             strcpy(entryalphabet[i], input);
@@ -104,15 +105,15 @@ void validacion(){
 
   //Capturar estados
     char estados[15][20]; //rows and columns
-    i = 0;
+    int size = 0;
     while(true)
     {
         // system("cls");
 
-        if (i>0)
+        if (size>0)
         {
             printf("Conjunto de estados: \n");
-            for (int x = 0; x < i; x++)
+            for (int x = 0; x < size; x++)
             {
                  printf("%s ",estados[x], " ");
             }
@@ -123,23 +124,46 @@ void validacion(){
         printf("Registre el cojunto de estados Q: \n");
         scanf("%s", &input);
 
-        if (strcmp(input, "S") == 0 && i > 0 or strcmp(input, "s") == 0 && i > 0 ) {
+        if (strcmp(input, "S") == 0 && size > 0 or strcmp(input, "s") == 0 && size > 0 ) {
             break;
+            system("cls");
         }
-        else if (strcmp(input, "S") == 0 && i == 0 or strcmp(input, "s") == 0 && i == 0)
+        else if (strcmp(input, "S") == 0 && size == 0 or strcmp(input, "s") == 0 && size == 0)
         {
             printf("Error, debe de haber por al menos un conjunto de estados \n");
         }       
         else{
-            //validation that the state doesn't exist
-            strcpy(estados[i],input);
-            i++;
+            bool isDuplicate = EstadoDuplicado(input, estados, size);
+            if (isDuplicate == true)
+            {
+                printf("Error, el estado ya existe \n");
+            }
+            else{
+                strcpy(estados[size],input);
+                size++;
+            }
+        
         }  
     }
 
-    printf("Registe el conjunto de estados A:");  
-    char estadoA;
-    scanf("%s", &estadoA); 
+    //Estados conjunto A 
+    char estadoA[20][20];
+    while (true)
+    {
+        printf("Registe el conjunto de estados A:"); 
+        scanf("%s", &estadoA);
+                    bool isDuplicate = EstadoDuplicado(input, estados, size);
+            if (isDuplicate == true)
+            {
+                printf("Error, el estado ya existe \n");
+            }
+            else{
+                strcpy(estados[size],input);
+                size++;
+            }
+
+    }
+     
 
     printf("Registe el estado inicial q0");
     char estadoQ0;
@@ -174,20 +198,19 @@ bool spanishPlz(char input[]){
     return false; // Return false if all characters are from the Spanish language
 }
 
-// bool EstadoDuplicado(char input[], char estados[][20]) {
-//     int result;
-//     bool duplicate = false;
-//     for (int i = 0; estados[i] != '\0'; i++) {
-//         printf("El estado actual es %s",estados[i], "\n");
-//         result = strcmp(estados + i, input); // Use estados + i to get the address of the current substring
-//         if (result == 1) {
-//             duplicate = true;
-//             break;
-//         }
-//     }
-//     printf("%d",result, "\n");
-//     return duplicate;
-// }
+
+bool EstadoDuplicado(const char input[], const char estados[][20], int size) {
+    int result;
+    bool duplicate = false;
+    for (int i = 0; i < size; i++) {
+        result = strcmp(estados[i], input);
+        if (result == 0) {
+            duplicate = true;
+            break;
+        }
+    }
+    return duplicate;
+}
 
 
  
