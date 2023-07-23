@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
+#include <ctype.h>
+
 
 // Estructura de la linked list del alfabeto de entrada
 struct simbolo_entrada {
@@ -89,6 +91,8 @@ void insertarSimbolo(struct simbolo_entrada** head, char simbolo) {
 struct conjunto_estados {
     char estado[20];
     struct conjunto_estados* next;
+    bool isFinal;
+
 };
 
 // Funcion para crear un nuevo conjunto de estado
@@ -201,23 +205,28 @@ int main() {
 
 
 void validacion() {
-
     system("cls");
-    char input[100]; // Assuming that the input will have at most 100 characters
+    int c;
+    char input[21]; // Assuming that the input will have at most 100 characters
     struct simbolo_entrada* headAlfabetoEntrada = NULL;
     struct conjunto_estados* estadoshead = NULL;
 
     int inputEntered = 0; // Variable to track whether input has been entered
 
     while (!inputEntered) { // Loop until input is entered
+        
+        while ((c = getchar()) != '\n' && c != EOF);
+        system("cls");
+
         printf("Ingresa los simbolos del alfabeto de entrada separados por espacios: ");
         fgets(input, sizeof(input), stdin);
 
-        // Check if input has been entered
-        if (strlen(input) > 1) {
+        // Check if the first character of the input is not a whitespace character
+        if (!isspace(input[0])) {
             inputEntered = 1; // Set the flag to break the loop
         } else {
-            printf("No se ha ingresado ningun caracter. Intentalo nuevamente.\n");
+            printf("No se ha ingresado ningun caracter. Presiona Enter para intentarlo nuevamente.\n");
+            // while ((c = getchar()) != '\n' && c != EOF);
         }
     }
 
@@ -234,24 +243,18 @@ void validacion() {
 
     system("cls");
 
-    printf("Alfabeto de entrada: ");
-    imprimirLista(headAlfabetoEntrada);
-
     //Estados
 
-    while (1) { 
+ while (1) {
+        printf("Alfabeto de entrada: ");
+        imprimirLista(headAlfabetoEntrada);
 
-        if (estadoshead != NULL)
-        {
-            
-            printf("Alfabeto de entrada: ");
-            imprimirLista(headAlfabetoEntrada);
-
+        if (estadoshead != NULL) {
             printf("Conjunto de estados ingresados:\n");
             struct conjunto_estados* current = estadoshead;
             while (current != NULL) {
-                printf("%s|", current->estado); 
-            current = current->next;
+                printf("%s|", current->estado);
+                current = current->next;
             }
             printf("\n");
         }
@@ -266,16 +269,34 @@ void validacion() {
         if (strlen(input) > 0) {
             // Check if the entered character is 's' or 'S'
             if (input[0] == 's' || input[0] == 'S') {
+                system("cls");
                 break; // Exit the loop if 's' or 'S' is entered
             } else {
-                // Insert the entered state into the linked list
-                insertarEstado(&estadoshead, input);
-                system("cls");
+                // Check if the entered state contains at least one non-whitespace character
+                int len = strlen(input);
+                bool hasNonWhitespace = false;
+                for (int i = 0; i < len; i++) {
+                    if (!isspace(input[i])) {
+                        hasNonWhitespace = true;
+                        break;
+                    }
+                }
+
+                if (hasNonWhitespace) {
+                    // Insert the entered state into the linked list
+                    insertarEstado(&estadoshead, input);
+                    system("cls");
+                } else {
+                    printf("No se ha ingresado ningun estado o se ha ingresado solo espacios. Intentalo nuevamente.\n");
+                    while ((c = getchar()) != '\n' && c != EOF);
+                    system("cls");
+                }
             }
         } else {
-            printf("No se ha ingresado ningun estado. Intentalo nuevamente.\n");
+            printf("No se ha ingresado ningun estado o se ha ingresado solo espacios. Intentalo nuevamente.\n");
+            while ((c = getchar()) != '\n' && c != EOF);
+            system("cls");
         }
-
     }
 
     printf("Alfabeto de entrada: ");
@@ -288,8 +309,72 @@ void validacion() {
     current = current->next;
     }
     printf("\n");
+    printf("\n");
+
     struct conjunto_estados* q0 = seleccionarEstadoInicial(estadoshead);
     printf("Estado inicial seleccionado (q0): %s\n", q0->estado);
+
+    // Estados finales
+    while (1) {
+        int show;
+        system("cls");
+        printf("Alfabeto de entrada: ");
+        imprimirLista(headAlfabetoEntrada);
+
+        printf("Conjunto de estados ingresados:\n");
+        struct conjunto_estados* current = estadoshead;
+        while (current != NULL) {
+            printf("%s|", current->estado); 
+        current = current->next;
+        }
+        printf("Estado inicial seleccionado (q0): %s\n", q0->estado);
+
+        if (show=1)
+        {
+            printf("Conjunto de estados finales ingresados: ");
+            current = estadoshead;
+            while (current != NULL) {
+                if (current->isFinal) {
+                    printf("%s|", current->estado);
+                }
+                printf("\n");
+                current = current->next;
+            }
+        }
         
-    
+
+        
+        printf("Inserte los estados finales. Para finalizar, ingrese S o s:\n");
+        char input[20]; // Assuming that the input state will have at most 20 characters
+
+        printf("Estado final: ");
+        fgets(input, sizeof(input), stdin);
+
+        // Remove the newline character from the input
+        input[strcspn(input, "\n")] = '\0';
+
+        // Check if the input is 'F' or 'f' to exit the loop
+        if (strcmp(input, "S") == 0 || strcmp(input, "s") == 0) {
+            break;
+        }
+
+        // Find the state in the linked list
+        current = estadoshead;
+        while (current != NULL) {
+            if (strcmp(current->estado, input) == 0) {
+                current->isFinal = true; // Mark the state as a final state
+                break;
+                show = 1;
+            }
+            current = current->next;
+        }
+
+        // If the current is NULL, the entered state does not exist in the list of states
+        if (current == NULL) {
+            printf("El estado final '%s' no existe en la lista de estados. Entrada negada.\n", input);
+            while ((c = getchar()) != '\n' && c != EOF);
+            system("cls");
+        }
+    }
+
 }
