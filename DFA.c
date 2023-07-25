@@ -1,29 +1,28 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <stdbool.h>
 #include <ctype.h>
-#include<time.h>
+#include <time.h>
 #include <signal.h>
- 
-/* Signal Handler for SIGINT */
-void sigintHandler(int sig_num)
-{
-    signal(SIGINT, sigintHandler);
-    printf("\n Cannot be terminated using Ctrl+C \n");
-    fflush(stdout);
-}
+#include <stdbool.h>
+
+struct estadisticas {
+    int palabras_registradas;
+    int palabras_validas;
+    int palabras_invalidas;
+    int palabras_traducidas;
+};
 
 //Funcion para imprimir el encabezado
 void encabezado(){
-    time_t t;   // not a primitive datatype
+    time_t t;   
     time(&t);
     printf("Desarollado por Arturo Velazquez \n");
     printf("%s \n \n", ctime(&t));
 }
 
 
-// Estructura de la linked list del alfabeto de entrada
+// Alfabeto de entrada
 struct simbolo_entrada {
     char simbolo;
     struct simbolo_entrada* next; //Apunta al siguente simoblo en la lista ligada
@@ -52,11 +51,11 @@ int simboloExiste(struct simbolo_entrada* head, char simbolo) {
     struct simbolo_entrada* current = head;
     while (current != NULL) {
         if (current->simbolo == simbolo) {
-            return 1; // Symbol already exists in the list
+            return 1;
         }
         current = current->next;
     }
-    return 0; // Symbol does not exist in the list
+    return 0;
 }
 
 //Funcion para revisar si los caracters son validos
@@ -98,6 +97,7 @@ void insertarSimbolo(struct simbolo_entrada** head, char simbolo) {
 }
 
 //Simbolo Salida
+
 // Estructura de la linked list del alfabeto de salida
 struct simbolo_salida {
     char simbolo;
@@ -127,11 +127,11 @@ int simboloSalidaExiste(struct simbolo_salida* head, char simbolo) {
     struct simbolo_salida* current = head;
     while (current != NULL) {
         if (current->simbolo == simbolo) {
-            return 1; // Symbol already exists in the list
+            return 1; 
         }
         current = current->next;
     }
-    return 0; // Symbol does not exist in the list
+    return 0;
 }
 
 //Funcion para revisar si los caracteres de salida son validos
@@ -230,15 +230,15 @@ struct conjunto_estados* buscarEstado(struct conjunto_estados* head, char estado
     struct conjunto_estados* current = head;
     while (current != NULL) {
         if (strcmp(current->estado, estado) == 0) {
-            return current; // Return the pointer to the matching state
+            return current;
         }
         current = current->next;
     }
-    return NULL; // Return NULL if the state is not found in the list
+    return NULL;
 }
 
 struct conjunto_estados* seleccionarEstadoInicial(struct conjunto_estados* head) {
-    char input[20]; // Assuming that the input state will have at most 20 characters
+    char input[20];
 
     printf("Seleccione el estado inicial (q0) de la lista de estados:\n");
 
@@ -247,16 +247,14 @@ struct conjunto_estados* seleccionarEstadoInicial(struct conjunto_estados* head)
         printf("Estado seleccionado: ");
         fgets(input, sizeof(input), stdin);
 
-        // Remove the newline character from the input
         input[strcspn(input, "\n")] = '\0';
 
-        // Find the selected state in the linked list
         struct conjunto_estados* selectedState = buscarEstado(head, input);
 
-        // Check if the selected state exists in the linked list
         if (selectedState != NULL) {
-            return selectedState; // Return the pointer to the selected state
+            return selectedState;
         } else {
+            system("cls");
             printf("El estado seleccionado no existe en la lista de estados. Intente nuevamente.\n");
         }
     }
@@ -286,25 +284,25 @@ void insertarTransicion(struct transicion** head, char estado_actual[20], char s
         current->next = nuevaTransicion;
     }
 }
-// Function to validate if a word is accepted by the automaton
+
 int validarPalabra(struct transicion* transiciones_head, struct conjunto_estados* q0, struct conjunto_estados* estadoshead, char* palabra) {
-    // Start from the initial state q0
+    
     struct conjunto_estados* estado_actual = q0;
 
-    // Traverse each character of the input word
+
     for (int i = 0; i < strlen(palabra); i++) {
         char simbolo = palabra[i];
 
-        // Find the corresponding transition for the current state and symbol
+        
         struct transicion* current_transicion = transiciones_head;
         while (current_transicion != NULL) {
             if (strcmp(current_transicion->estado_actual, estado_actual->estado) == 0 && current_transicion->simbolo == simbolo) {
-                // Transition found, move to the next state
+
                 struct conjunto_estados* estado_siguiente = buscarEstado(estadoshead, current_transicion->estado_siguiente);
                 if (estado_siguiente != NULL) {
                     estado_actual = estado_siguiente;
                 } else {
-                    // Invalid transition, word is invalid
+                    
                     return 0;
                 }
                 break;
@@ -312,26 +310,16 @@ int validarPalabra(struct transicion* transiciones_head, struct conjunto_estados
             current_transicion = current_transicion->next;
         }
 
-        // If the transition for the current state and symbol is not found, the word is invalid
         if (current_transicion == NULL) {
             return 0;
         }
-        
-        // Debug print statements during each iteration
-        printf("Validating word: %s\n", palabra);
-        printf("Current state: %s, Symbol: %c\n", estado_actual->estado, simbolo);
-        if (current_transicion->estado_siguiente[0] == '\0') {
-            printf("Next state: Estado final\n");
-        } else {
-            printf("Next state: %s\n", current_transicion->estado_siguiente);
-        }
+
     }
 
-    // After traversing all characters, check if the final state is in the set of final states
     if (estado_actual->isFinal) {
-        return 1; // Valid word
+        return 1;
     } else {
-        return 0; // Invalid word
+        return 0;
     }
 }
 
@@ -340,10 +328,10 @@ int validarPalabraAlfabeto(struct simbolo_entrada* headAlfabeto, char* palabra) 
     for (int i = 0; i < strlen(palabra); i++) {
         char simbolo = palabra[i];
         if (!simboloExiste(headAlfabeto, simbolo)) {
-            return 0; // Invalid symbol in the word
+            return 0;
         }
     }
-    return 1; // All symbols are valid
+    return 1; 
 }
 
 //Traduccion
@@ -387,11 +375,11 @@ char traducirSimbolo(struct traduccion_simbolo* head, char simbolo_entrada) {
     struct traduccion_simbolo* current = head;
     while (current != NULL) {
         if (current->simbolo_entrada == simbolo_entrada) {
-            return current->simbolo_salida; // Return the translated symbol
+            return current->simbolo_salida;
         }
         current = current->next;
     }
-    return simbolo_entrada; // Return the input symbol if there is no translation for it
+    return simbolo_entrada;
 }
 
 
@@ -401,7 +389,6 @@ void validacion();
 void traduccion();
 
 int main() {
-     signal(SIGINT, sigintHandler);
     int selection;
     while (true) {
         encabezado();
@@ -434,10 +421,10 @@ int main() {
 void validacion() {
     system("cls");
     int c;
-    char input[21]; // Assuming that the input will have at most 100 characters
+    char input[21];
     struct simbolo_entrada* headAlfabetoEntrada = NULL;
     struct conjunto_estados* estadoshead = NULL;
-    int inputEntered = 0; // Variable to track whether input has been entered
+    int inputEntered = 0;
 
     //Alfabeto
 
@@ -490,17 +477,13 @@ void validacion() {
         printf("Inserte el conjunto de estados. Ingrese el simbolo y despues presione enter. Para salir, ingrese S o s: ");
         fgets(input, sizeof(input), stdin);
 
-            // Remove the newline character from the input
             input[strcspn(input, "\n")] = '\0';
 
-            // Check if input has been entered
             if (strlen(input) > 0) {
-                // Check if the entered character is 's' or 'S'
                 if (input[0] == 's' || input[0] == 'S') {
                     system("cls");
-                    break; // Exit the loop if 's' or 'S' is entered
+                    break; 
                 } else {
-                    // Check if the entered state contains at least one non-whitespace character
                     int len = strlen(input);
                     bool hasNonWhitespace = false;
                     for (int i = 0; i < len; i++) {
@@ -511,7 +494,6 @@ void validacion() {
                     }
 
                     if (hasNonWhitespace) {
-                        // Insert the entered state into the linked list
                         insertarEstado(&estadoshead, input);
                         system("cls");
                     } else {
@@ -527,17 +509,22 @@ void validacion() {
             }
     }
 
-    encabezado();
-    printf("Alfabeto de entrada: ");
-    imprimirLista(headAlfabetoEntrada);
+        struct conjunto_estados* q0 = NULL;
+        while (q0 == NULL) {
+            encabezado();
+            printf("Alfabeto de entrada: ");
+            imprimirLista(headAlfabetoEntrada);
 
-    printf("Conjunto de estados ingresados:\n");
-    imprmirEstados(estadoshead);
-
-    //Estado q0
- 
-    struct conjunto_estados* q0 = seleccionarEstadoInicial(estadoshead);
-    printf("Estado inicial seleccionado (q0): %s\n", q0->estado);
+            printf("Conjunto de estados ingresados:\n");
+            imprmirEstados(estadoshead);
+            q0 = seleccionarEstadoInicial(estadoshead);
+            if (q0 == NULL) {
+                printf("Estado inicial seleccionado (q0) es NULL. Por favor, selecciona un estado inicial valido.\n");
+                system("cls");
+            } else {
+                printf("Estado inicial seleccionado (q0): %s\n", q0->estado);
+            }
+        }
 
     // Estados finales
     while (1) {
@@ -569,24 +556,21 @@ void validacion() {
         
 
         printf("Inserte los estados finales. Para finalizar, ingrese S o s:\n");
-        char input[20]; // Assuming that the input state will have at most 20 characters
+        char input[20];
 
         printf("Estado final: ");
         fgets(input, sizeof(input), stdin);
 
-        // Remove the newline character from the input
         input[strcspn(input, "\n")] = '\0';
 
-        // Check if the input is 'F' or 'f' to exit the loop
         if (strcmp(input, "S") == 0 || strcmp(input, "s") == 0) {
             break;
         }
 
-        // Find the state in the linked list
         current = estadoshead;
         while (current != NULL) {
             if (strcmp(current->estado, input) == 0) {
-                current->isFinal = true; // Mark the state as a final state
+                current->isFinal = true;
                 show = 1;
                 break;
                 
@@ -594,7 +578,6 @@ void validacion() {
             current = current->next;
         }
 
-        // If the current is NULL, the entered state does not exist in the list of states
         if (current == NULL) {
             printf("El estado final '%s' no existe en la lista de estados. Entrada negada.\n", input);
             while ((c = getchar()) != '\n' && c != EOF);
@@ -602,7 +585,7 @@ void validacion() {
         }
 
     }
-
+  
     //Funcion de transicion
     struct transicion* transiciones_head = NULL;
     struct simbolo_entrada* current_symbol = headAlfabetoEntrada;
@@ -611,7 +594,6 @@ void validacion() {
     while (current_symbol != NULL) {
         char simbolo = current_symbol->simbolo;
 
-        // Reset the current_state pointer to the head of the conjunto_estados for each symbol
         current_state = estadoshead;
 
         while (current_state != NULL) {
@@ -641,10 +623,13 @@ void validacion() {
     while (1) {
 
         encabezado();
-        struct conjunto_estados* current = estadoshead;
         printf("Alfabeto de entrada: ");
         imprimirLista(headAlfabetoEntrada);
+        printf("Conjunto de estados ingresados:\n");
+        imprmirEstados(estadoshead);
+        printf("Estado inicial seleccionado (q0): %s\n", q0->estado);
         printf("Conjunto de estados finales ingresados: ");
+        struct conjunto_estados* current = estadoshead;
         current = estadoshead;
         while (current != NULL) {
                 if (current->isFinal) {
@@ -652,27 +637,17 @@ void validacion() {
                 }
                 printf("\n");
                 current = current->next;
-            }
-
-        printf("Conjunto de estados ingresados:\n");
-        imprmirEstados(estadoshead);
-
-        printf("Estado inicial seleccionado (q0): %s\n", q0->estado);
-
+        }
     printf("Inserte la palabra a validar. Para salir, ingrese S o s:\n");
         fgets(input, sizeof(input), stdin);
 
-        // Remove the newline character from the input
         input[strcspn(input, "\n")] = '\0';
 
-        // Check if the input is 'S' or 's' to exit the loop
         if (strcmp(input, "S") == 0 || strcmp(input, "s") == 0) {
             break;
         }
 
-        // Validate if the word contains only characters from the entry alphabet
         if (validarPalabraAlfabeto(headAlfabetoEntrada, input)) {
-            // The word is valid, now validate if it is accepted by the automaton
             int isValid = validarPalabra(transiciones_head, q0, estadoshead, input);
              if (isValid) {
                 printf("Palabra '%s' es valida.\n", input);
@@ -689,11 +664,11 @@ void validacion() {
 void traduccion(){
     system("cls");
     int c;
-    char input[21]; // Assuming that the input will have at most 100 characters
+    char input[21];
     struct simbolo_entrada* headAlfabetoEntrada = NULL;
     struct simbolo_salida* headSalidaEntrada = NULL;
     struct conjunto_estados* estadoshead = NULL;
-    int inputEntered = 0; // Variable to track whether input has been entered
+    int inputEntered = 0;
     struct traduccion_simbolo* headTraducciones = NULL;
 
     //Alfabeto Entrada
@@ -725,13 +700,11 @@ void traduccion(){
         token = strtok(NULL, " ");
     }
 
-    system("cls");
-
-        int exitAlphabetEntered = 0;
+    int exitAlphabetEntered = 0;
     struct simbolo_salida* headAlfabetoSalida = NULL;
 
     while (!exitAlphabetEntered) {
-        while ((c = getchar()) != '\n' && c != EOF);
+        //while ((c = getchar()) != '\n' && c != EOF); para esperar enter
         system("cls");
 
         encabezado();
@@ -758,7 +731,6 @@ void traduccion(){
 
     system("cls");
 
-    // Print both the entry and exit alphabets
     printf("Alfabeto de entrada: ");
     imprimirLista(headAlfabetoEntrada);
 
@@ -784,17 +756,14 @@ void traduccion(){
         printf("Inserte el conjunto de estados. Ingrese el simbolo y despues presione enter. Para salir, ingrese S o s: ");
         fgets(input, sizeof(input), stdin);
 
-            // Remove the newline character from the input
+            // QUuitar enter
             input[strcspn(input, "\n")] = '\0';
 
-            // Check if input has been entered
             if (strlen(input) > 0) {
-                // Check if the entered character is 's' or 'S'
                 if (input[0] == 's' || input[0] == 'S') {
                     system("cls");
-                    break; // Exit the loop if 's' or 'S' is entered
+                    break; 
                 } else {
-                    // Check if the entered state contains at least one non-whitespace character
                     int len = strlen(input);
                     bool hasNonWhitespace = false;
                     for (int i = 0; i < len; i++) {
@@ -805,7 +774,7 @@ void traduccion(){
                     }
 
                     if (hasNonWhitespace) {
-                        // Insert the entered state into the linked list
+        
                         insertarEstado(&estadoshead, input);
                         system("cls");
                     } else {
@@ -863,24 +832,21 @@ void traduccion(){
         
 
         printf("Inserte los estados finales. Para finalizar, ingrese S o s:\n");
-        char input[20]; // Assuming that the input state will have at most 20 characters
-
+        char input[20]; 
         printf("Estado final: ");
         fgets(input, sizeof(input), stdin);
 
-        // Remove the newline character from the input
+
         input[strcspn(input, "\n")] = '\0';
 
-        // Check if the input is 'F' or 'f' to exit the loop
         if (strcmp(input, "S") == 0 || strcmp(input, "s") == 0) {
             break;
         }
 
-        // Find the state in the linked list
         current = estadoshead;
         while (current != NULL) {
             if (strcmp(current->estado, input) == 0) {
-                current->isFinal = true; // Mark the state as a final state
+                current->isFinal = true; 
                 show = 1;
                 break;
                 
@@ -888,7 +854,6 @@ void traduccion(){
             current = current->next;
         }
 
-        // If the current is NULL, the entered state does not exist in the list of states
         if (current == NULL) {
             printf("El estado final '%s' no existe en la lista de estados. Entrada negada.\n", input);
             while ((c = getchar()) != '\n' && c != EOF);
@@ -898,7 +863,8 @@ void traduccion(){
     }
 
     //Funcion de transicion
-        // Get transitions from the user for each symbol and state combination
+    system("cls");
+
     struct transicion* transiciones_head = NULL;
     struct simbolo_entrada* current_symbol = headAlfabetoEntrada;
     struct conjunto_estados* current_state = estadoshead;
@@ -906,8 +872,7 @@ void traduccion(){
     while (current_symbol != NULL) {
         char simbolo = current_symbol->simbolo;
 
-        // Reset the current_state pointer to the head of the conjunto_estados for each symbol
-        current_state = estadoshead;
+        current_state = estadoshead; //Reiniciar el head
 
         while (current_state != NULL) {
             char estado_siguiente[20];
@@ -917,6 +882,7 @@ void traduccion(){
             printf("Estado siguiente: ");
             fgets(estado_siguiente, sizeof(estado_siguiente), stdin);
             estado_siguiente[strcspn(estado_siguiente, "\n")] = '\0';
+            system("cls");
 
             if (!buscarEstado(estadoshead, estado_siguiente)) {
                 printf("El estado siguiente '%s' no existe en la lista de estados. Intente nuevamente.\n", estado_siguiente);
@@ -931,7 +897,7 @@ void traduccion(){
         current_symbol = current_symbol->next;
     }
 
-// Obtaining the translations
+// Traducciones
 struct simbolo_entrada* current_symbol_entrada = headAlfabetoEntrada;
 
 while (current_symbol_entrada != NULL) {
@@ -945,7 +911,7 @@ while (current_symbol_entrada != NULL) {
         char salida;
         scanf(" %c", &salida);
 
-        printf("DEBUG: entrada: %c, estado_actual: %s, salida: %c\n", entrada, estado_actual, salida); // Add this line for debugging
+        printf("DEBUG: entrada: %c, estado_actual: %s, salida: %c\n", entrada, estado_actual, salida); //Debug
 
 
         insertarTraduccion(&headTraducciones, entrada, estado_actual, salida);
@@ -955,30 +921,46 @@ while (current_symbol_entrada != NULL) {
     current_symbol_entrada = current_symbol_entrada->next;
 }
 
-    while (1) {
-        char input[100]; // Assuming that the input word will have at most 100 characters
+        input[strcspn(input, "\n")] = '\0';
 
-        // Ask the user for the word to translate
+//Traducir
+
+    while (1) {
+     
+
+        encabezado();
+        printf("Alfabeto de entrada: ");
+        imprimirLista(headAlfabetoEntrada);
+        printf("Conjunto de estados ingresados:\n");
+        imprmirEstados(estadoshead);
+        printf("Estado inicial seleccionado (q0): %s\n", q0->estado);
+        printf("Conjunto de estados finales ingresados: ");
+        struct conjunto_estados* current = estadoshead;
+        current = estadoshead;
+        while (current != NULL) {
+                if (current->isFinal) {
+                    printf("%s|", current->estado);
+                }
+                printf("\n");
+                current = current->next;
+        }
+
+        char input[100]; 
+
         printf("Ingrese la palabra a traducir usando caracteres del alfabeto de entrada (o ingrese 'S' para salir): ");
         fgets(input, sizeof(input), stdin);
 
-        // Remove the newline character from the input
         input[strcspn(input, "\n")] = '\0';
 
-        // Check if the user entered 'S' or 's' to exit the loop
         if (strcmp(input, "S") == 0 || strcmp(input, "s") == 0) {
             break;
         }
 
-        // Start the translation from the initial state q0
         struct conjunto_estados* estado_actual = q0;
 
-        // Initialize the translated word as an empty string
         char translated_word[100] = "";
 
-        // Validate if the word contains only characters from the entry alphabet
         if (validarPalabraAlfabeto(headAlfabetoEntrada, input)) {
-            // The word is valid, now validate if it is accepted by the automaton
             int isValid = validarPalabra(transiciones_head, q0, estadoshead, input);
             if (isValid) {
                 printf("Palabra '%s' es valida.\n", input);
@@ -986,36 +968,25 @@ while (current_symbol_entrada != NULL) {
                 printf("Palabra '%s' es invalida.\n", input);
             }
 
-        // Traverse each character of the input word
         for (int i = 0; i < strlen(input); i++) {
             char simbolo_entrada = input[i];
 
-            // Find the corresponding translation for the current state and input symbol
             struct traduccion_simbolo* current_translation = headTraducciones;
             while (current_translation != NULL) {
                 if (strcmp(current_translation->estado_actual, estado_actual->estado) == 0 &&
                     current_translation->simbolo_entrada == simbolo_entrada) {
-                    // Translation found, append the translated symbol to the translated word
                     char translated_symbol = current_translation->simbolo_salida;
                     strncat(translated_word, &translated_symbol, 1);
 
-                    // Update the current state to the next state based on the translation
                     struct conjunto_estados* estado_siguiente = buscarEstado(estadoshead, current_translation->estado_siguiente);
                     if (estado_siguiente != NULL) {
                         estado_actual = estado_siguiente;
-                    } else {
-                        // Invalid translation, break the loop
-                        printf("Error: No existe el estado siguiente '%s' en la lista de estados.\n",
-                               current_translation->estado_siguiente);
-                        break;
-                    }
-
+                    } 
                     break;
                 }
                 current_translation = current_translation->next;
             }
 
-            // If the translation for the current state and input symbol is not found, break the loop
             if (current_translation == NULL) {
                 printf("Error: No se encontró la traducción para el símbolo de entrada '%c' y el estado '%s'.\n",
                        simbolo_entrada, estado_actual->estado);
@@ -1023,7 +994,6 @@ while (current_symbol_entrada != NULL) {
             }
         }
 
-        // Print the translated word
         printf("Palabra traducida: %s\n", translated_word);
     }
     }
