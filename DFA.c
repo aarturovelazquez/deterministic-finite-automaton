@@ -13,6 +13,14 @@ struct estadisticas {
     int palabras_traducidas;
 };
 
+struct estadisticas_globales {
+    int palabras_registradas;
+    int palabras_validas;
+    int palabras_invalidas;
+    int palabras_traducidas;
+    int AFD_registrados;
+};
+
 //Funcion para imprimir el encabezado
 void encabezado(){
     time_t t;   
@@ -388,9 +396,12 @@ char traducirSimbolo(struct traduccion_simbolo* head, char simbolo_entrada) {
 void validacion();
 void traduccion();
 
+struct estadisticas_globales estadisticas_globales = {0, 0, 0, 0, 0};
+
 int main() {
     int selection;
     while (true) {
+        char c;
         encabezado();
         printf("1. AFD Traduccion \n");
         printf("2. AFD Validacion \n");
@@ -406,7 +417,15 @@ int main() {
                 break;
 
             case 3:
-                return 0;
+                printf("\n\nEstadisticas:\n");
+                printf("Palabras registradas: %d\n", estadisticas_globales.palabras_registradas);
+                printf("Palabras validas: %d\n", estadisticas_globales.palabras_validas);
+                printf("Palabras invalidas: %d\n", estadisticas_globales.palabras_invalidas);
+                printf("Palabras traducidas: %d\n", estadisticas_globales.palabras_traducidas);
+                printf("AFD registrados: %d\n", estadisticas_globales.AFD_registrados);
+                printf("Presiona enter para continuar");
+                while ((c = getchar()) != '\n' && c != EOF);
+                break;
 
             default:
                 printf("Error, opcion no valida. Favor de seleccionar una opcion valida");
@@ -414,11 +433,13 @@ int main() {
                 system("cls");
         }
     }
+    return 0;
 
 }
 
 
 void validacion() {
+    struct estadisticas estadisticas = {0, 0, 0, 0};
     system("cls");
     int c;
     char input[21];
@@ -649,16 +670,29 @@ void validacion() {
 
         if (validarPalabraAlfabeto(headAlfabetoEntrada, input)) {
             int isValid = validarPalabra(transiciones_head, q0, estadoshead, input);
+            estadisticas.palabras_registradas++;
              if (isValid) {
                 printf("Palabra '%s' es valida.\n", input);
+                estadisticas.palabras_validas++;
             } else {
                 printf("Palabra '%s' es invalida.\n", input);
+                 estadisticas.palabras_invalidas++;
             }
         } else {
             system("cls");
             printf("La palabra '%s' contiene caracteres que no pertenecen al alfabeto de entrada. Intente nuevamente.\n", input);
         }
     }
+    printf("\n\nEstadisticas:\n");
+    printf("Palabras registradas: %d\n", estadisticas.palabras_registradas);
+    printf("Palabras validas: %d\n", estadisticas.palabras_validas);
+    printf("Palabras invalidas: %d\n", estadisticas.palabras_invalidas);
+
+    estadisticas_globales.palabras_registradas += estadisticas.palabras_registradas;
+    estadisticas_globales.palabras_validas += estadisticas.palabras_validas;
+    estadisticas_globales.palabras_invalidas += estadisticas.palabras_invalidas;
+    estadisticas_globales.AFD_registrados++;
+
 }
 
 void traduccion(){
@@ -923,30 +957,11 @@ while (current_symbol_entrada != NULL) {
 
         input[strcspn(input, "\n")] = '\0';
 
-//Traducir
+    //Traducir
 
     while (1) {
      
-
-        encabezado();
-        printf("Alfabeto de entrada: ");
-        imprimirLista(headAlfabetoEntrada);
-        printf("Conjunto de estados ingresados:\n");
-        imprmirEstados(estadoshead);
-        printf("Estado inicial seleccionado (q0): %s\n", q0->estado);
-        printf("Conjunto de estados finales ingresados: ");
-        struct conjunto_estados* current = estadoshead;
-        current = estadoshead;
-        while (current != NULL) {
-                if (current->isFinal) {
-                    printf("%s|", current->estado);
-                }
-                printf("\n");
-                current = current->next;
-        }
-
         char input[100]; 
-
         printf("Ingrese la palabra a traducir usando caracteres del alfabeto de entrada (o ingrese 'S' para salir): ");
         fgets(input, sizeof(input), stdin);
 
@@ -995,7 +1010,7 @@ while (current_symbol_entrada != NULL) {
         }
 
         printf("Palabra traducida: %s\n", translated_word);
-    }
+        }
     }
 }
 
