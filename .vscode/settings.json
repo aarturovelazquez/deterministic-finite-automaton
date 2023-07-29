@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "DFA.C": "cpp"
+        "DFA.C": "cpp",
+        "Test.C": "cpp",
+        "typeinfo": "c"
     }
 }
