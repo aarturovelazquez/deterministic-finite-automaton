@@ -48,13 +48,22 @@ int main() {
     struct simbolo_entrada* head = NULL;
     wchar_t input[100];
 
-    wprintf(L"Ingresa los simbolos del alfabeto de entrada separados por espacios: ");
-    fgetws(input, sizeof(input), stdin);
+    while (1) {
+        wprintf(L"Ingresa los simbolos del alfabeto de entrada separados por espacios: ");
+        fgetws(input, sizeof(input), stdin);
 
-    wchar_t* token = wcstok(input, L" ");
-    while (token != NULL) {
-        insertarSimbolo(&head, token[0]);
-        token = wcstok(NULL, L" ");
+        wchar_t* token = wcstok(input, L" ");
+        while (token != NULL) {
+            insertarSimbolo(&head, token[0]);
+            token = wcstok(NULL, L" ");
+        }
+
+        if (head != NULL) {
+            break;
+        }
+
+        wprintf(L"El alfabeto no puede estar vacio. Presiona Enter para intentarlo nuevamente.\n");
+        while (getwchar() != L'\n');
     }
 
     wprintf(L"Alfabeto de entrada: ");

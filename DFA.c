@@ -6,21 +6,21 @@
 #include <signal.h>
 #include <locale.h>
 #include <windows.h>
+#include <conio.h> // Include the _getch() function
 
 
 
-bool CtrlHandler(DWORD fdwCtrlType) {
+
+BOOL CtrlHandler(DWORD fdwCtrlType) {
     switch (fdwCtrlType) {
+        // Handle the Ctrl+C signal
         case CTRL_C_EVENT:
-            return TRUE;
-
-        case CTRL_CLOSE_EVENT:
-            return TRUE;
-
+            return TRUE; // Return TRUE to indicate that the signal has been handled
         default:
             return FALSE;
     }
 }
+
 
 struct estadisticas {
     int palabras_registradas;
@@ -42,7 +42,9 @@ void encabezado(){
     time_t t;   
     time(&t);
     printf("Desarollado por Arturo Velazquez \n");
-    printf("%s \n \n", ctime(&t));
+    printf("%s", ctime(&t));
+    printf("Metodos Formales");
+    printf("\n \n");
 }
 
 int esValidoAlfabeto(const char* str) {
@@ -450,35 +452,48 @@ bool isValidExitSymbol(char symbol, struct simbolo_salida* headExitAlphabet) {
     return false; // Symbol is not part of the exit alphabet
 }
 
+char getValidCharacterInput() {
+    char ch;
+    while (1) {
+        ch = _getch();
+        if (ch == 0 || ch == -32) {
+            // Special key detected (e.g., arrow keys, function keys)
+            _getch(); // Consume the second character of the special key
+        } else if (ch == 3 || ch == 18) {
+            // Ctrl+C (3) and Alt+F4 (18) detected
+        } else {
+            return ch; // Valid character input received
+        }
+    }
+}
+
 
 
 // Declaraciones
 void validacion();
 void traduccion();
 
-struct estadisticas_globales estadisticas_globales = {0, 0, 0, 0, 0};
+struct estadisticas_globales estadisticas_globales = {0,0,0,0,0};
 
 
 int main() {
-    if (!SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandler, TRUE)) {
-        printf("Error setting control handler.\n");
-        return 1;
-    }
-
-    setlocale(LC_ALL, "es_ES.UTF-8");
-
-
+    // if (!SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandler, TRUE)) {
+    //     printf("Error setting control handler.\n");
+    //     return 1;
+    // }
+    
+    system("cls");
+    encabezado();
     while (1) {
-
     int selection;
     while (1) {
+
         char c;
-        encabezado();
         printf("1. AFD Traduccion\n");
         printf("2. AFD Validacion\n");
         printf("3. Salir\n");
         printf("Selecciona una opcion: ");
-        scanf("%d", &selection);
+        selection = getValidCharacterInput() - '0'; // Convert char to integer
         switch (selection) {
             case 1:
                 traduccion();
@@ -489,25 +504,32 @@ int main() {
                 break;
 
             case 3:
-                printf("\n\nEstadisticas:\n");
+                system("cls");
+                encabezado();
+                
+                while ((c = getchar()) != '\n' && c != EOF);
+                printf("\n\nEstadisticas:\n\n");
                 printf("Palabras registradas: %d\n", estadisticas_globales.palabras_registradas);
                 printf("Palabras validas: %d\n", estadisticas_globales.palabras_validas);
                 printf("Palabras invalidas: %d\n", estadisticas_globales.palabras_invalidas);
                 printf("Palabras traducidas: %d\n", estadisticas_globales.palabras_traducidas);
                 printf("AFD registrados: %d\n", estadisticas_globales.AFD_registrados);
-                printf("Presiona enter para continuar");
+                printf("Gracias por usar el programa. I had the time of my life fighting dragons with you. Hasta luego.\n\n");
+                printf("Presiona enter para continuar \n");
                 while ((c = getchar()) != '\n' && c != EOF);
                 break;
 
             default:
-                printf("Error, opcion no valida. Favor de seleccionar una opcion valida.\n");
-                selection = NULL;
                 system("cls");
+                encabezado();
+                printf("ERROR: Opcion no valida. Favor de seleccionar una opcion valida.\n \n");
+        }
+        if (selection==3){
+                return 0;
         }
     }
+    
 
-    printf("Gracias por usar el programa. Hasta luego.\n");
-    return 0;
     }
 }
 
@@ -515,25 +537,18 @@ int main() {
 
 void validacion() {
     struct estadisticas estadisticas = {0, 0, 0, 0};
-    system("cls");
     int c;
     char input[100];
     struct simbolo_entrada* headAlfabetoEntrada = NULL;
     struct conjunto_estados* estadoshead = NULL;
     int inputEntered = 0;
 
-    void encabezado();
+    system("cls");
+    encabezado();
+
     //Alfabeto
     while (!inputEntered) { 
-        //Para que no cierre
-        if (!SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandler, TRUE)) {
-        printf("Error setting control handler.\n");
-        }
-        
-        while ((c = getchar()) != '\n' && c != EOF);
-        system("cls");
 
-        encabezado();
         printf("Ingresa los simbolos del alfabeto de entrada separados por espacios: ");
         fgets(input, sizeof(input), stdin);
 
@@ -541,7 +556,9 @@ void validacion() {
         if (!isspace(input[0])) {
             inputEntered = 1;
         } else {
-            printf("No se ha ingresado ningun caracter. Presiona Enter para intentarlo nuevamente.\n");
+            system("cls");
+            encabezado();
+            printf("ERROR: No se ha ingresado ningun caracter. Presiona Enter para intentarlo nuevamente.\n");
         }
     }
 
@@ -555,12 +572,11 @@ void validacion() {
         token = strtok(NULL, " ");
     }
 
-    // system("cls");
-
+    system("cls");
+    encabezado();
     
     //Estados
     while (1) {
-        encabezado();
         printf("Alfabeto de entrada: ");
         imprimirLista(headAlfabetoEntrada);
 
@@ -595,17 +611,18 @@ void validacion() {
                     if (hasNonWhitespace) {
                         insertarEstado(&estadoshead, input);
                         system("cls");
+                        encabezado();
                     } else {
                         system("cls");
                         encabezado();
-                        printf("No se ha ingresado ningun estado o se ha ingresado solo espacios. Intentalo nuevamente.\n");
+                        printf("ERROR: No se ha ingresado ningun estado o se ha ingresado solo espacios. Intentalo nuevamente. Presiona enter\n");
                         while ((c = getchar()) != '\n' && c != EOF);
                     }
                 }
             } else {
                 system("cls");
                 encabezado();
-                printf("No se ha ingresado ningun estado o se ha ingresado solo espacios. Intentalo nuevamente.\n");
+                printf("ERROR: No se ha ingresado ningun estado o se ha ingresado solo espacios. Intentalo nuevamente. Presiona enter\n");
                 while ((c = getchar()) != '\n' && c != EOF);
             }
     }
@@ -619,7 +636,7 @@ void validacion() {
         q0 = seleccionarEstadoInicial(estadoshead);
         if (q0 == NULL) {
             system("cls");
-            printf("Estado inicial seleccionado (q0) es NULL. Por favor, selecciona un estado inicial valido.\n");
+            printf("ERROR: El estado inicial (q0) no puede estar vacio. Por favor, selecciona un estado inicial valido.\n");
             encabezado();
         } else {
             printf("Estado inicial seleccionado (q0): %s\n", q0->estado);
@@ -673,7 +690,7 @@ void validacion() {
         if (current == NULL) {
             system("cls");
             encabezado();
-            printf("El estado final '%s' no existe en la lista de estados. Entrada negada.\n", input);
+            printf("ERROR: El estado final '%s' no existe en la lista de estados. Entrada negada.\n", input);
             while ((c = getchar()) != '\n' && c != EOF);
         }
 
@@ -701,7 +718,7 @@ void validacion() {
             estado_siguiente[strcspn(estado_siguiente, "\n")] = '\0';
 
             if (!buscarEstado(estadoshead, estado_siguiente)) {
-                printf("El estado siguiente '%s' no existe en la lista de estados. Intente nuevamente.\n", estado_siguiente);
+                printf("ERROR: El estado siguiente '%s' no existe en la lista de estados. Intente nuevamente.\n", estado_siguiente);
                 system("cls");
                 encabezado();
                 continue;
@@ -719,9 +736,9 @@ void validacion() {
 
     
     system("cls");
+    encabezado();
     while (1) {
 
-        encabezado();
         printf("Alfabeto de entrada: ");
         imprimirLista(headAlfabetoEntrada);
         printf("Conjunto de estados ingresados:\n");
@@ -737,7 +754,7 @@ void validacion() {
                 printf("\n");
                 current = current->next;
         }
-    printf("Inserte la palabra a validar. Para salir, ingrese S o s:\n");
+        printf("Inserte la palabra a validar. Para salir, ingrese S o s:\n");
         fgets(input, sizeof(input), stdin);
 
         input[strcspn(input, "\n")] = '\0';
@@ -748,23 +765,35 @@ void validacion() {
 
         if (validarPalabraAlfabeto(headAlfabetoEntrada, input)) {
             int isValid = validarPalabra(transiciones_head, q0, estadoshead, input);
-            estadisticas.palabras_registradas++;
              if (isValid) {
-                printf("Palabra '%s' es valida.\n", input);
+                system("cls");
+                encabezado();
+                printf("RESULTADO: Palabra '%s' es valida.\n \n", input);
+                estadisticas.palabras_registradas++;
                 estadisticas.palabras_validas++;
             } else {
-                printf("Palabra '%s' es invalida.\n", input);
-                 estadisticas.palabras_invalidas++;
+                system("cls");
+                encabezado();
+                printf("RESULTADO: Palabra '%s' es invalida.\n \n", input);
+                estadisticas.palabras_registradas++;
+                estadisticas.palabras_invalidas++;
             }
         } else {
             system("cls");
-            printf("La palabra '%s' contiene caracteres que no pertenecen al alfabeto de entrada. Intente nuevamente.\n", input);
+            encabezado();
+            printf("ERROR: La palabra '%s' contiene caracteres que no pertenecen al alfabeto de entrada. Intente nuevamente.\n", input);
         }
     }
+    system("cls");
+    encabezado();
+    
     printf("\n\nEstadisticas:\n");
     printf("Palabras registradas: %d\n", estadisticas.palabras_registradas);
     printf("Palabras validas: %d\n", estadisticas.palabras_validas);
     printf("Palabras invalidas: %d\n", estadisticas.palabras_invalidas);
+
+    printf("Presiona enter para continuar");
+    while ((c = getchar()) != '\n' && c != EOF);
 
     estadisticas_globales.palabras_registradas += estadisticas.palabras_registradas;
     estadisticas_globales.palabras_validas += estadisticas.palabras_validas;
@@ -775,7 +804,6 @@ void validacion() {
 
 void traduccion(){
     struct estadisticas estadisticas = {0, 0, 0, 0};
-    system("cls");
     int c;
     char input[100];
     struct simbolo_entrada* headAlfabetoEntrada = NULL;
@@ -784,14 +812,12 @@ void traduccion(){
     int inputEntered = 0;
     struct traduccion_simbolo* headTraducciones = NULL;
 
+    system("cls");
+    encabezado();
     //Alfabeto Entrada
-
     while (!inputEntered) { 
         
         while ((c = getchar()) != '\n' && c != EOF);
-        system("cls");
-
-        encabezado();
         printf("Ingresa los simbolos del alfabeto de entrada separados por espacios: ");
         fgets(input, sizeof(input), stdin);
 
@@ -799,7 +825,9 @@ void traduccion(){
         if (!isspace(input[0])) {
             inputEntered = 1;
         } else {
-            printf("No se ha ingresado ningun caracter. Presiona Enter para intentarlo nuevamente.\n");
+            system("cls");
+            encabezado();
+            printf("ERROR: No se ha ingresado ningun caracter. Presiona Enter para intentarlo nuevamente.\n");
         }
     }
 
@@ -816,11 +844,12 @@ void traduccion(){
     int exitAlphabetEntered = 0;
     struct simbolo_salida* headAlfabetoSalida = NULL;
 
+    //Alfabeto Salida
+    system("cls");
+    encabezado();
+
     while (!exitAlphabetEntered) {
         //while ((c = getchar()) != '\n' && c != EOF); para esperar enter
-        system("cls");
-
-        encabezado();
         printf("Ingresa los simbolos del alfabeto de salida separados por espacios: ");
         fgets(input, sizeof(input), stdin);
 
@@ -828,7 +857,9 @@ void traduccion(){
         if (!isspace(input[0])) {
             exitAlphabetEntered = 1;
         } else {
-            printf("No se ha ingresado ningun caracter. Presiona Enter para intentarlo nuevamente.\n");
+            printf("ERROR: No se ha ingresado ningun caracter. Presiona Enter para intentarlo nuevamente.\n");
+            system("cls");
+            encabezado();
         }
     }
 
@@ -843,11 +874,11 @@ void traduccion(){
     }
 
     system("cls");
-    
-//Estados
+    encabezado();
+    //Estados
 
     while (1) {
-        encabezado();
+       
         printf("Alfabeto de entrada: ");
         imprimirLista(headAlfabetoEntrada);
 
@@ -872,7 +903,6 @@ void traduccion(){
 
             if (strlen(input) > 0) {
                 if (input[0] == 's' || input[0] == 'S') { //
-                    system("cls");
                     break; 
                 } else {
                     int len = strlen(input);
@@ -885,18 +915,23 @@ void traduccion(){
                     }
 
                     if (hasNonWhitespace) {
+                        system("cls");
+                        encabezado();
                         insertarEstado(&estadoshead, input);
-                        system("cls");
                     } else {
-                        printf("No se ha ingresado ningun estado o se ha ingresado solo espacios. Intentalo nuevamente.\n");
-                        while ((c = getchar()) != '\n' && c != EOF);
                         system("cls");
+                        encabezado();
+                        printf("ERROR: No se ha ingresado ningun estado o se ha ingresado solo espacios. Intentalo nuevamente.\n");
+                        while ((c = getchar()) != '\n' && c != EOF);
+                        
                     }
                 }
             }
     }
 
+    system("cls");
     encabezado();
+
     printf("Alfabeto de entrada: ");
     imprimirLista(headAlfabetoEntrada);
 
@@ -908,11 +943,11 @@ void traduccion(){
     struct conjunto_estados* q0 = seleccionarEstadoInicial(estadoshead);
     printf("Estado inicial seleccionado (q0): %s\n", q0->estado);
 
+    system("cls");
+    encabezado();
     // Estados finales
     while (1) {
-        encabezado();
         int show;
-        system("cls");
  
         struct conjunto_estados* current = estadoshead;
         printf("Alfabeto de entrada: ");
@@ -936,7 +971,6 @@ void traduccion(){
             }
         }
         
-
         printf("Inserte los estados finales. Para finalizar, ingrese S o s:\n");
         char input[20]; 
         printf("Estado final: ");
@@ -954,6 +988,8 @@ void traduccion(){
             if (strcmp(current->estado, input) == 0) {
                 current->isFinal = true; 
                 show = 1;
+                system("cls");
+                encabezado();
                 break;
                 
             }
@@ -961,15 +997,17 @@ void traduccion(){
         }
 
         if (current == NULL) {
-            printf("El estado final '%s' no existe en la lista de estados. Entrada negada.\n", input);
-            while ((c = getchar()) != '\n' && c != EOF);
             system("cls");
+            encabezado();
+            printf("ERROR: El estado final '%s' no existe en la lista de estados. Entrada negada.\n", input);
+            while ((c = getchar()) != '\n' && c != EOF);
         }
 
     }
 
     //Funcion de transicion
     system("cls");
+    encabezado();
 
     struct transicion* transiciones_head = NULL;
     struct simbolo_entrada* current_symbol = headAlfabetoEntrada;
@@ -991,11 +1029,15 @@ void traduccion(){
             system("cls");
 
             if (!buscarEstado(estadoshead, estado_siguiente)) {
-                printf("El estado siguiente '%s' no existe en la lista de estados. Intente nuevamente.\n", estado_siguiente);
+                system("cls");
+                encabezado();
+                printf("ERROR: El estado siguiente '%s' no existe en la lista de estados. Intente nuevamente.\n", estado_siguiente);
                 continue;
             }
 
             insertarTransicion(&transiciones_head, current_state->estado, simbolo, estado_siguiente);
+            system("cls");
+            encabezado();
 
             current_state = current_state->next;
         }
@@ -1003,6 +1045,8 @@ void traduccion(){
         current_symbol = current_symbol->next;
     }
 
+    system("cls");
+    encabezado();
     // Traducciones
     struct simbolo_entrada* current_symbol_entrada = headAlfabetoEntrada;
 
@@ -1023,13 +1067,17 @@ void traduccion(){
             if (isValidExitSymbol(salida, headAlfabetoSalida)) {
                 break; // Valid symbol, exit the loop
             } else {
-                printf("El simbolo '%c' no es valido en el alfabeto de salida. Intente nuevamente.\n", salida);
+                system("cls");
+                encabezado();
+                printf("ERROR: El simbolo '%c' no es valido en el alfabeto de salida. Intente nuevamente.\n", salida);
             }
         }
 
-        printf("DEBUG: entrada: %c, estado_actual: %s, salida: %c\n", entrada, estado_actual, salida); // Debug
+        // printf("DEBUG: entrada: %c, estado_actual: %s, salida: %c\n", entrada, estado_actual, salida); // Debug
 
         insertarTraduccion(&headTraducciones, entrada, estado_actual, salida);
+        system("cls");
+        encabezado();
 
         current_estado = current_estado->next;
     }
@@ -1038,16 +1086,19 @@ void traduccion(){
 
     while ((c = getchar()) != '\n' && c != EOF);
 
+    system("cls");
+    encabezado();
+
     //Traducir
     while (1) {
      
         char input[100]; 
-        printf("Ingrese la palabra a traducir usando caracteres del alfabeto de entrada (o ingrese 'S' para salir): ");
+        printf("Ingrese la palabra a traducir usando caracteres del alfabeto de entrada (o ingrese '*' para salir): ");
         fgets(input, sizeof(input), stdin);
 
         input[strcspn(input, "\n")] = '\0';
 
-        if (strcmp(input, "S") == 0 || strcmp(input, "s") == 0) {
+        if (strcmp(input, "*") == 0) {
             break;
         }
 
@@ -1056,14 +1107,19 @@ void traduccion(){
         char translated_word[100] = "";
 
 
-        estadisticas.palabras_registradas++;
+       
         if (validarPalabraAlfabeto(headAlfabetoEntrada, input)) {
+            estadisticas.palabras_registradas++;
             int isValid = validarPalabra(transiciones_head, q0, estadoshead, input);
             if (isValid) {
-                printf("Palabra '%s' es valida.\n", input);
+                system("cls");
+                encabezado();
+                printf("RESULTADO: Palabra '%s' es valida.\n", input);
                 estadisticas.palabras_validas++;
             } else {
-                printf("Palabra '%s' es invalida.\n", input);
+                system("cls");
+                encabezado();
+                printf("RESULTADO: Palabra '%s' es invalida.\n", input);
                 estadisticas.palabras_invalidas++;
             }
                 
@@ -1087,26 +1143,45 @@ void traduccion(){
                 current_translation = current_translation->next;
             }
 
-            if (current_translation == NULL) {
-                printf("Error: No se encontró la traducción para el símbolo de entrada '%c' y el estado '%s'.\n",
-                       simbolo_entrada, estado_actual->estado);
-                break;
-            }
+            // if (current_translation == NULL) {
+            //     printf("Error: No se encontró la traducción para el símbolo de entrada '%c' y el estado '%s'.\n",
+            //            simbolo_entrada, estado_actual->estado);
+            //     break;
+            // }
         }
-
         printf("Palabra traducida: %s\n", translated_word);
         estadisticas.palabras_traducidas++;
         }
+        else{
+            system("cls");
+            encabezado();
+            printf("ERROR: la palabra no pertenece al alfabeto de entrada \n");
+        }
     }
+
+
+    system("cls");
+    encabezado();
+
+    printf("\n\nEstadisticas:\n");
+    printf("Palabras registradas: %d\n", estadisticas.palabras_registradas);
+    printf("Palabras validas: %d\n", estadisticas.palabras_validas);
+    printf("Palabras invalidas: %d\n", estadisticas.palabras_invalidas);
+    printf("Palabras traducidas: %d\n", estadisticas.palabras_traducidas);
+
+    printf("Presiona enter para continuar");
+    while ((c = getchar()) != '\n' && c != EOF);
 
     estadisticas_globales.palabras_invalidas += estadisticas.palabras_validas;
     estadisticas_globales.palabras_registradas += estadisticas.palabras_registradas;
     estadisticas_globales.palabras_validas += estadisticas.palabras_validas;
-    estadisticas_globales.palabras_traducidas += estadisticas.palabras_registradas;
+    estadisticas_globales.palabras_traducidas += estadisticas.palabras_traducidas;
     estadisticas_globales.AFD_registrados++;
 
-}
+    system("cls");
+    encabezado();
 
+}
 
 
 
