@@ -2,6 +2,8 @@
     "files.associations": {
         "DFA.C": "cpp",
         "Test.C": "cpp",
-        "typeinfo": "c"
-    }
+        "typeinfo": "c",
+        "WideDFA.C": "cpp"
+    },
+    "C_Cpp.errorSquiggles": "disabled"
 }
