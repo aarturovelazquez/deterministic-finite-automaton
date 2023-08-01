@@ -3,7 +3,8 @@
         "DFA.C": "cpp",
         "Test.C": "cpp",
         "typeinfo": "c",
-        "WideDFA.C": "cpp"
+        "WideDFA.C": "cpp",
+        "DupeDFA.C": "cpp"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }
